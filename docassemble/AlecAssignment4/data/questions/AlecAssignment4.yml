@@ -1,0 +1,153 @@
+---
+modules:
+ - docassemble.base.core
+ - docassemble.base.util
+---
+objects:
+  - user: Individual
+  - other: DAList.using(object_type=Individual, ask_number=True)
+---
+mandatory: True
+code: |
+  user.name.first
+  some_date
+  legal_matter
+  appeal
+  had_lawyer
+  not_acting
+  afford_lawyer
+  law_in_ab
+  in_ab
+  user.signature
+---
+mandatory: True
+question: |
+ Welcome to Generic Legal Aid Service. Today's date is ${ today() }.
+subquestion: |
+ What is your name?
+fields: 
+ - First Name: user.name.first
+ - Last Name: user.name.last
+---
+mandatory: True
+question: |
+  Please confirm that you are a human by selecting the date. 
+fields:
+  - Date: some_date
+    datatype: date
+---
+question: |
+  Hello, ${ user }.
+subquestion: |
+  What kind of legal issues will you need help with today?
+  Select the legal matter that is the most important to you.
+fields: 
+  - Legal Matter: legal_matter
+    datatype: radio
+    code: |
+      myoptions
+---
+code: |
+  myoptions = [
+                {'criminal': "Criminal Law"},
+                {'family': "Family Law"},
+                {'other': "Neither Criminal nor Family Law"}
+              ]
+---
+question: "Have you received legal aid help for this matter before?"
+subquestion: |
+  This matter is an appeal of a matter for which I have previously received legal aid:
+yesno: appeal
+---
+question: "We need to know if you currently have legal representation."
+subquestion: |
+  Have you had a lawyer in the past?
+yesno: had_lawyer
+---
+question: "We need to know if you currently have legal representation."
+subquestion: |
+  Are you currently represented by a lawyer?
+noyes: not_acting
+---
+question: "Legal Aid Alberta has a financial eligibility requirement."
+subquestion: |
+  Can you currently afford a lawyer?
+noyes: afford_lawyer
+---
+question: "Legal Aid Alberta also has requirements related to jurisdiction."
+subquestion: |
+  Do you live in Alberta?
+yesno: in_ab
+---
+question: "Legal Aid Alberta also has requirements related to jurisdiction."
+subquestion: |
+  Did the matter for which you require legal aid occur in Alberta?
+yesno: law_in_ab
+---
+code: |
+  if in_ab == True:
+    if law_in_ab == True:
+      juris = True
+    else:
+      juris = False
+  else:
+    juris = False
+---
+code: |
+  if legal_matter == criminal:
+    eligible = True
+  elif legal_matter == family:
+    eligible = True
+  else:
+    eligible = False
+---
+code: |
+  if had_lawyer == True:
+    if not_acting == True:
+      if afford_lawyer == True:
+        unrep = True
+      else:
+        unrep = False
+    else:
+      unrep = False
+  else:
+    if not_acting == True:
+      if afford_lawyer == True:
+        unrep = True
+      else:
+        unrep = False
+    else:
+      unrep = False
+---
+code: |
+  if unrep == True:
+    if juris == True: 
+      if eligible == True:
+        legal_aid = True
+      else:
+        legal_aid = False
+    else:
+      legal_aid = False
+  else:
+    legal_aid = False
+---
+question: |
+  Please sign to confirm that everything you have told us is truthful.
+subquestion: |
+  By signing your name, you agree to our terms and conditions.
+signature: user.signature
+under: |
+  ${ user }
+---
+mandatory: True
+question: |
+  Based on your responses, we've prepared the attached memo.
+attachment:
+  name: Memo to ${ user } re Legal Aid
+  filename: memo re legal aid
+  docx template file: Template_4.docx
+  valid formats:
+    - pdf
+    - docx
+exit: exit
+---
