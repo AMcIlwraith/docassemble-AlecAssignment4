@@ -14,7 +14,8 @@ code: |
   legal_matter
   appeal
   had_lawyer
-  not_acting
+  if had_lawyer == True:
+    not_acting
   afford_lawyer
   law_in_ab
   in_ab
@@ -39,20 +40,12 @@ fields:
 question: |
   Hello, ${ user }.
 subquestion: |
-  What kind of legal issues will you need help with today?
-  Select the legal matter that is the most important to you.
-fields: 
-  - Legal Matter: legal_matter
-    datatype: radio
-    code: |
-      myoptions
----
-code: |
-  myoptions = [
-                {'criminal': "Criminal Law"},
-                {'family': "Family Law"},
-                {'other': "Neither Criminal nor Family Law"}
-              ]
+  What kind of legal issue will you need help with today?
+field: legal_matter
+buttons:
+  - Criminal Law: criminal
+  - Family Law: family
+  - Neither Criminal nor Family Law: other
 ---
 question: "Have you received legal aid help for this matter before?"
 subquestion: |
@@ -94,9 +87,9 @@ code: |
     juris = False
 ---
 code: |
-  if legal_matter == criminal:
+  if legal_matter == "criminal":
     eligible = True
-  elif legal_matter == family:
+  elif legal_matter == "family":
     eligible = True
   else:
     eligible = False
@@ -124,10 +117,16 @@ code: |
     if juris == True: 
       if eligible == True:
         legal_aid = True
+      elif appeal == True:
+        legal_aid = True
       else:
         legal_aid = False
+    elif appeal == True:
+      legal_aid = True
     else:
-      legal_aid = False
+      legal_aid = False  
+  elif appeal == True:
+    legal_aid = True
   else:
     legal_aid = False
 ---
